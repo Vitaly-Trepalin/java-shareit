@@ -115,8 +115,8 @@ public class ItemControllerTest {
     void testSearchItems() throws Exception {
         when(itemService.searchItems(anyString())).thenReturn(List.of(itemDto1));
 
-        mockMvc.perform(get("/items/search").
-                        param("text", "description1"))
+        mockMvc.perform(get("/items/search")
+                        .param("text", "description1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(id1))
                 .andExpect(jsonPath("$[0].name").value(name1))

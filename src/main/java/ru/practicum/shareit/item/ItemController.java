@@ -31,7 +31,8 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<Collection<ItemDto>> findAllItemsByUserId(@RequestHeader(value = "X-Sharer-User-Id") long userId) {
+    public ResponseEntity<Collection<ItemDto>> findAllItemsByUserId(@RequestHeader(value = "X-Sharer-User-Id")
+                                                                    long userId) {
         return new ResponseEntity<>(itemService.findAllItemsByUserId(userId), HttpStatus.OK);
     }
 
