@@ -1,17 +1,20 @@
 package ru.practicum.shareit.item.repositories;
 
-import ru.practicum.shareit.item.dto.ItemDto;
+
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.Collection;
 
 public interface ItemRepository {
-    ItemDto findByIdItem(long itemId);
+    Item findByIdItem(long itemId);
 
-    Collection<ItemDto> findAllItemsByUserId(long userId);
+    Collection<Item> findAllItemsByUserId(User user);
 
-    ItemDto createItem(long userId, ItemDto itemDto);
+    Item createItem(Item item);
 
-    ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
+    void updateItem(Item item);
 
-    Collection<ItemDto> searchItems(String text);
+    Collection<ItemResponseDto> searchItems(String text);
 }

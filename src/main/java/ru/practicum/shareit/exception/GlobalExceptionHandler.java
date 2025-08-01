@@ -9,51 +9,49 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.Map;
-
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNotFoundException(NotFoundException e) {
-        log.warn("NotFoundException : {}", e.getMessage());
-        return Map.of("error:", e.getMessage());
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        log.warn("NotFoundException");
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        log.warn("MethodArgumentTypeMismatchException : {}", e.getMessage());
-        return Map.of("error:", e.getMessage());
+    public ErrorResponse handleMethodArgumentTypeMismatchException(final MethodArgumentTypeMismatchException e) {
+        log.warn("MethodArgumentTypeMismatchException");
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.warn("MethodArgumentNotValidException : {}", e.getMessage());
-        return Map.of("error:", e.getMessage());
+    public ErrorResponse handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
+        log.warn("MethodArgumentNotValidException");
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleMissingRequestHeaderException(MissingRequestHeaderException e) {
-        log.warn("MissingRequestHeaderException : {}", e.getMessage());
-        return Map.of("error:", e.getMessage());
+    public ErrorResponse handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
+        log.warn("MissingRequestHeaderException");
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(ResourceConflictException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handleResourceConflictException(ResourceConflictException e) {
-        log.warn("ResourceConflictException : {}", e.getMessage());
-        return Map.of("error:", e.getMessage());
+    public ErrorResponse handleResourceConflictException(final ResourceConflictException e) {
+        log.warn("ResourceConflictException");
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleThrowableException(Throwable e) {
-        log.warn("Throwable : {}", e.getMessage());
-        return Map.of("error:", e.getMessage());
+    public ErrorResponse handleThrowableException(final Exception e) {
+        log.warn("Exception", e);
+        return new ErrorResponse(e.getMessage());
     }
 }

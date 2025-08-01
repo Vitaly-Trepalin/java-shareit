@@ -3,9 +3,10 @@ package ru.practicum.shareit.item.repositories;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repositories.UserRepository;
 
 import java.util.Collection;
@@ -25,51 +26,35 @@ public class InMemoryItemRepository implements ItemRepository {
     private final UserRepository userRepository;
 
     @Override
-    public ItemDto findByIdItem(long itemId) {
-        Item item = items.get(itemId);
-        if (item == null) {
+    public Item findByIdItem(long itemId) {
+        if (!items.containsKey(itemId)) {
             throw new NotFoundException("Нет вещи с id = " + itemId);
         }
-        return itemMapper.toItemDto(item);
+        return items.get(itemId);
     }
 
     @Override
-    public Collection<ItemDto> findAllItemsByUserId(long userId) {
-        checkingForUserPresence(userId);
+    public Collection<Item> findAllItemsByUserId(User owner) {
         return items.values().stream()
-                .filter(item -> item.getOwner().equals(userId))
-                .map(itemMapper::toItemDto)
+                .filter(item -> item.getOwner().equals(owner))
                 .toList();
     }
 
     @Override
-    public ItemDto createItem(long userId, ItemDto itemDto) {
-        checkingForUserPresence(userId);
-        Item item = itemMapper.toItem(userId, idGenerator, itemDto);
+    public Item createItem(Item item) {
+        Item newItem = new Item(idGenerator.getAndIncrement(), item.getName(), item.getDescription(),
+                item.isAvailable(), item.getOwner(), item.getRequest());
+        items.put(newItem.getId(), newItem);
+        return newItem;
+    }
+
+    @Override
+    public void updateItem(Item item) {
         items.put(item.getId(), item);
-        return itemMapper.toItemDto(items.get(idGenerator.get() - 1));
     }
 
     @Override
-    public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
-        if (userId != items.get(itemId).getOwner()) {
-            throw new NotFoundException(String.format("У вещи с id = %d нет владельца с id = %d", itemId, userId));
-        }
-        Item item = items.get(itemId);
-        if (itemDto.getName() != null) {
-            item.setName(itemDto.getName());
-        }
-        if (itemDto.getDescription() != null) {
-            item.setDescription(itemDto.getDescription());
-        }
-        if (itemDto.getAvailable() != null) {
-            item.setAvailable(itemDto.getAvailable());
-        }
-        return itemMapper.toItemDto(items.get(itemId));
-    }
-
-    @Override
-    public Collection<ItemDto> searchItems(String text) {
+    public Collection<ItemResponseDto> searchItems(String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
@@ -83,11 +68,7 @@ public class InMemoryItemRepository implements ItemRepository {
                 .toList();
         return Stream.concat(matchingNames.stream(), matchingDescriptions.stream())
                 .distinct()
-                .map(itemMapper::toItemDto)
+                .map(itemMapper::toItemResponseDto)
                 .toList();
-    }
-
-    private void checkingForUserPresence(long userId) {
-        userRepository.findByIdUser(userId);
     }
 }
