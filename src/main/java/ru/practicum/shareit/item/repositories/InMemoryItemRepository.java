@@ -4,10 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.repositories.UserRepository;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -19,11 +18,10 @@ import java.util.stream.Stream;
 
 @Repository
 @RequiredArgsConstructor
-public class InMemoryItemRepository implements ItemRepository {
+public class InMemoryItemRepository implements OldItemRepository {
     private final Map<Long, Item> items = new HashMap<>();
     private final AtomicLong idGenerator = new AtomicLong(1);
     private final ItemMapper itemMapper;
-    private final UserRepository userRepository;
 
     @Override
     public Item findByIdItem(long itemId) {
@@ -42,10 +40,11 @@ public class InMemoryItemRepository implements ItemRepository {
 
     @Override
     public Item createItem(Item item) {
-        Item newItem = new Item(idGenerator.getAndIncrement(), item.getName(), item.getDescription(),
-                item.isAvailable(), item.getOwner(), item.getRequest());
-        items.put(newItem.getId(), newItem);
-        return newItem;
+//        Item newItem = new Item(idGenerator.getAndIncrement(), item.getName(), item.getDescription(),
+//                item.isAvailable(), item.getOwner(), item.getRequest());
+//        items.put(newItem.getId(), newItem);
+//        return newItem;
+        return null;
     }
 
     @Override
@@ -68,7 +67,7 @@ public class InMemoryItemRepository implements ItemRepository {
                 .toList();
         return Stream.concat(matchingNames.stream(), matchingDescriptions.stream())
                 .distinct()
-                .map(itemMapper::toItemResponseDto)
+                .map(itemMapper::mapToItemResponseDto)
                 .toList();
     }
 }

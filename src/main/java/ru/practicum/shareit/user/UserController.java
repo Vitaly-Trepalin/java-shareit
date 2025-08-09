@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.dto.UserCreateDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
-import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collection;
 
@@ -32,33 +31,33 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserResponseDto> findByIdUser(@PathVariable @Positive long userId) { // сделать проверку на null
-        log.info("method launched (findByIdUser(long userId = {}))", userId);
+        log.info("Method launched (findByIdUser(long userId = {}))", userId);
         return new ResponseEntity<>(userService.findByIdUser(userId), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<Collection<UserResponseDto>> findAllUsers() {
-        log.info("method launched (findAllUsers())");
+        log.info("Method launched (findAllUsers())");
         return new ResponseEntity<>(userService.findAllUsers(), HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody @Valid UserCreateDto userCreateDto) {
-        log.info("method launched (createUser(UserDto userDto = {}))", userCreateDto);
+        log.info("Method launched (createUser(UserDto userDto = {}))", userCreateDto);
         return new ResponseEntity<>(userService.createUser(userCreateDto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> updateUser(@PathVariable @Positive long userId, // сделать проверку на null
+    public ResponseEntity<UserResponseDto> updateUser(@PathVariable @Positive long userId,
                                                       @RequestBody @Valid UserUpdateDto userUpdateDto) {
-        log.info("method launched (updateUser(long userId = {}, User user = {}))", userId, userUpdateDto);
+        log.info("Method launched (updateUser(long userId = {}, User user = {}))", userId, userUpdateDto);
         UserUpdateDto newUserUpdateDto = new UserUpdateDto(userId, userUpdateDto.getName(), userUpdateDto.getEmail());
         return new ResponseEntity<>(userService.updateUser(newUserUpdateDto), HttpStatus.OK);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable @Positive long userId) { // сделать проверку на null
-        log.info("method launched (deleteUser(long userId = {}))", userId);
+    public ResponseEntity<Void> deleteUser(@PathVariable @Positive long userId) {
+        log.info("Method launched (deleteUser(long userId = {}))", userId);
         userService.deleteUser(userId);
         return new ResponseEntity<>(HttpStatus.OK);
     }

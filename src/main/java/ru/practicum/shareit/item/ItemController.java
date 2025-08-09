@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
-import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.Collection;
 
@@ -32,22 +32,22 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemResponseDto> findByIdItem(@PathVariable @Positive long itemId) { // сделать проверку на null
-        log.info("method launched (findByIdItem(long itemId = {}))", itemId);
+    public ResponseEntity<ItemResponseDto> findByIdItem(@PathVariable @Positive long itemId) {
+        log.info("Method launched (findByIdItem(long itemId = {}))", itemId);
         return new ResponseEntity<>(itemService.findByIdItem(itemId), HttpStatus.OK);
     }
 
     @GetMapping
     public ResponseEntity<Collection<ItemResponseDto>> findAllItemsByUserId(@RequestHeader(value = "X-Sharer-User-Id")
-                                                                            @Positive long userId) { // сделать проверку на null
-        log.info("method launched (findAllItemsByUserId(long userId = {}))", userId);
+                                                                            @Positive long userId) {
+        log.info("Method launched (findAllItemsByUserId(long userId = {}))", userId);
         return new ResponseEntity<>(itemService.findAllItemsByUserId(userId), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<ItemResponseDto> createItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId, // сделать проверку на null
+    public ResponseEntity<ItemResponseDto> createItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
                                                       @RequestBody @Valid ItemCreateDto itemCreateDto) {
-        log.info("method launched (createItem(long userId = {}, ItemCreateDto itemCreateDto = {}))",
+        log.info("Method launched (createItem(long userId = {}, ItemCreateDto itemCreateDto = {}))",
                 userId, itemCreateDto);
         ItemCreateDto newItemCreateDto = new ItemCreateDto(itemCreateDto.getName(), itemCreateDto.getDescription(),
                 itemCreateDto.getAvailable(), userId, itemCreateDto.getRequest());
@@ -55,10 +55,10 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemResponseDto> updateItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId, // сделать проверку на null
+    public ResponseEntity<ItemResponseDto> updateItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
                                                       @PathVariable @Positive long itemId,
                                                       @RequestBody @Valid ItemUpdateDto itemUpdateDto) {
-        log.info("method launched (updateItem(long userId = {}, long itemId = {}, ItemDto itemDto = {}))", userId,
+        log.info("Method launched (updateItem(long userId = {}, long itemId = {}, ItemDto itemDto = {}))", userId,
                 itemId, itemUpdateDto);
         ItemUpdateDto newItemUpdateDto = new ItemUpdateDto(itemId, itemUpdateDto.getName(),
                 itemUpdateDto.getDescription(), itemUpdateDto.getAvailable(), userId,
@@ -67,8 +67,8 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Collection<ItemResponseDto>> searchItems(@RequestParam() String text) { // сделать проверку на null
-        log.info("method launched (searchItems(String text = {}))", text);
+    public ResponseEntity<Collection<ItemResponseDto>> searchItems(@RequestParam() String text) {
+        log.info("Method launched (searchItems(String text = {}))", text);
         return new ResponseEntity<>(itemService.searchItems(text), HttpStatus.OK);
     }
 }

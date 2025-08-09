@@ -2,12 +2,12 @@ package ru.practicum.shareit.item.repositories;
 
 
 import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.user.User;
 
 import java.util.Collection;
 
-public interface ItemRepository {
+public interface OldItemRepository {
     Item findByIdItem(long itemId);
 
     Collection<Item> findAllItemsByUserId(User user);

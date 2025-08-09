@@ -1,14 +1,16 @@
 package ru.practicum.shareit.item.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
 @Data
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class ItemResponseDto {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final Boolean available;
-    private final Long request;
+    private Long id;
+    private String name;
+    private String description;
+    private Boolean available;
+    private Long request;
 }
