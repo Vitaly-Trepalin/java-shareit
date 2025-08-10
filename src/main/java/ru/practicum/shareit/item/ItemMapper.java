@@ -9,8 +9,7 @@ import ru.practicum.shareit.user.User;
 public class ItemMapper {
     public ItemResponseDto mapToItemResponseDto(Item item) {
         return new ItemResponseDto(item.getId(), item.getName(), item.getDescription(), item.isAvailable(),
-                item.getRequest());
-//                item.getRequest() != null ? item.getRequest() : null);
+                item.getOwner().getId(), item.getRequest());
     }
 
     public Item mapToItem(ItemCreateDto itemDto, User user) {

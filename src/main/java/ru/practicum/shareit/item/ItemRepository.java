@@ -10,6 +10,8 @@ import java.util.Collection;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     Collection<Item> findAllByOwner(User user);
 
+//    Item findByOwnerIdAndStatusTrue(long owner);
+
     @Query("SELECT i FROM Item AS i " +
             "WHERE (LOWER(i.name) LIKE LOWER(concat('%', :text, '%')) " +
             "OR LOWER(i.description) LIKE LOWER(concat('%', :text, '%'))) " +

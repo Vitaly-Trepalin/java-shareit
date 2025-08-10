@@ -9,6 +9,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RestControllerAdvice
 @Slf4j
@@ -46,6 +47,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleMissingRequestHeaderException(final MissingRequestHeaderException e) {
         log.warn("MissingRequestHeaderException");
+        return new ErrorResponse(e.getRootCause().getMessage());
+    }
+
+    @ExceptionHandler(HttpClientErrorException.class)
+    public ErrorResponse handleHttpClientErrorException(final HttpClientErrorException e) {
+        log.warn("HttpClientErrorException");
         return new ErrorResponse(e.getMessage());
     }
 

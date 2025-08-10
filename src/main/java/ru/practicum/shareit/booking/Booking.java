@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.booking;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,31 +10,37 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "items")
+@Table(name = "bookings")
 @Getter
 @Setter
-public class Item {
+public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "item_id")
+    @Column(name = "booking_id")
     private Long id;
-    private String name;
-    private String description;
-    private boolean available;
+    @Column(name = "start_date")
+    private LocalDateTime start;
+    @Column(name = "end_date")
+    private LocalDateTime end;
+    @ManyToOne
+    @JoinColumn(name = "item_id", nullable = false)
+    private Item item;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User owner;
-    private Long request;
+    private User booker;
+    private Status status;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Item)) return false;
-        return id != null && id.equals(((Item) o).getId());
+        if (!(o instanceof Booking)) return false;
+        return id != null && id.equals(((Booking) o).getId());
     }
 
     @Override
