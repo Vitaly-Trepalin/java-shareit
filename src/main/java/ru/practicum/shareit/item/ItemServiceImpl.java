@@ -12,9 +12,14 @@ import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemCreateCommentDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.ItemResponseWithCommentsDto;
 import ru.practicum.shareit.item.dto.ItemResponseWithDatesAndCommentsDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -34,13 +39,26 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
 
     @Override
-    public ItemResponseWithCommentsDto findByIdItem(long itemId) {
+    public ItemResponseWithDatesAndCommentsDto findByIdItem(long itemId, long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException(String.format("Нет вещи с id = %d", itemId)));
-        Collection<Comment> comments = commentRepository.findAllCommentByItem(item);
-        return ItemMapper.mapToItemResponseAndCommentsDto(item, comments.stream()
-                .map(CommentMapper::mapToCommentResponseDto)
-                .toList());
+
+        List<CommentResponseDto> comments = commentRepository.findAllCommentByItem(item).stream()
+                .map(CommentMapper::mapToCommentResponseDto).toList();
+
+        Collection<Booking> bookings = bookingRepository.findLastAndNextBookingItem(itemId);
+        List<LocalDateTime> lastBooking = null;
+        List<LocalDateTime> nextBooking = null;
+        if (item.getOwner().getId() == userId) {
+            for (Booking booking : bookings) {
+                if (booking.getEnd().isBefore(LocalDateTime.now())) {
+                    lastBooking = List.of(booking.getStart(), booking.getEnd());
+                } else {
+                    nextBooking = List.of(booking.getStart(), booking.getEnd());
+                }
+            }
+        }
+        return ItemMapper.mapToItemResponseWithDatesAndCommentsDto(item, lastBooking, nextBooking, comments);
     }
 
     @Override
@@ -49,22 +67,24 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream()
                 .map(item -> {
-                    Collection<Comment> comments = commentRepository.findAllCommentByItem(item);
-                    ItemResponseWithDatesAndCommentsDto dto = ItemMapper
-                            .mapToItemResponseWithDatesAndCommentsDto(item, comments.stream()
-                            .map(CommentMapper::mapToCommentResponseDto)
-                            .toList());
+                    List<CommentResponseDto> comments = commentRepository.findAllCommentByItem(item).stream()
+                            .map(CommentMapper::mapToCommentResponseDto).toList();
+
                     Collection<Booking> bookings = bookingRepository.findLastAndNextBookingItem(item.getId());
-                    bookings.forEach(booking -> {
-                        if (!booking.getStart().isAfter(LocalDateTime.now())) {
-                            dto.setLastBooking(List.of(booking.getStart(), booking.getEnd()));
-                        } else if (booking.getStart().isAfter(LocalDateTime.now())) {
-                            dto.setNextBooking(List.of(booking.getStart(), booking.getEnd()));
+                    List<LocalDateTime> lastBooking = null;
+                    List<LocalDateTime> nextBooking = null;
+                    if (item.getOwner().getId() == userId) {
+                        for (Booking booking : bookings) {
+                            if (booking.getEnd().isBefore(LocalDateTime.now())) {
+                                lastBooking = List.of(booking.getStart(), booking.getEnd());
+                            } else {
+                                nextBooking = List.of(booking.getStart(), booking.getEnd());
+                            }
                         }
-                    });
-                    return dto;
-                })
-                .collect(Collectors.toList());
+                    }
+                    return ItemMapper.mapToItemResponseWithDatesAndCommentsDto(item, lastBooking, nextBooking,
+                            comments);
+                }).toList();
     }
 
     @Override

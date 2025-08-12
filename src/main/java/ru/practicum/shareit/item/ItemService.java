@@ -4,14 +4,13 @@ import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemCreateCommentDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.ItemResponseWithCommentsDto;
 import ru.practicum.shareit.item.dto.ItemResponseWithDatesAndCommentsDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
 import java.util.Collection;
 
 public interface ItemService {
-    ItemResponseWithCommentsDto findByIdItem(long itemId);
+    ItemResponseWithDatesAndCommentsDto findByIdItem(long itemId, long userId);
 
     Collection<ItemResponseWithDatesAndCommentsDto> findAllItemsByUserId(long userId);
 

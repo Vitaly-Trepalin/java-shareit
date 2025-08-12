@@ -9,8 +9,8 @@ import ru.practicum.shareit.booking.dto.BookingApproveDto;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -95,11 +95,11 @@ public class BookingServiceImpl implements BookingService {
         Collection<Booking> bookings = switch (state) {
             case "REJECTED" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.REJECTED);
             case "WAITING" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.WAITING);
-            case "PAST" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.CANCELED);
+            case "PAST" -> bookingRepository.findAllByBookerAndStatusAndEndBeforeOrderByStartAsc(booker,
+                    Status.APPROVED, currentTimeAndDate);
             case "FUTURE" -> bookingRepository.findAllByBookerAndStatusAndStartAfterOrderByStartAsc(
                     booker, Status.APPROVED, currentTimeAndDate);
-            case "CURRENT" -> bookingRepository.findAllByBookerAndStatusAndStartBeforeOrderByStartAsc(
-                    booker, Status.APPROVED, currentTimeAndDate);
+            case "CURRENT" -> bookingRepository.findCurrentBookings(booker, Status.APPROVED, currentTimeAndDate);
             default -> bookingRepository.findAllByBookerOrderByStart(booker);
         };
         return bookings.stream()
@@ -115,7 +115,7 @@ public class BookingServiceImpl implements BookingService {
         Collection<Booking> bookings = switch (state) {
             case "REJECTED" -> bookingRepository.findBookingsForAllUserItems(owner, Status.REJECTED);
             case "WAITING" -> bookingRepository.findBookingsForAllUserItems(owner, Status.WAITING);
-            case "PAST" -> bookingRepository.findBookingsForAllUserItems(owner, Status.CANCELED);
+            case "PAST" -> bookingRepository.findPastBookingsForAllUserItems(owner, Status.APPROVED);
             case "FUTURE" -> bookingRepository.findFutureBookingsForAllUserItems(owner, Status.APPROVED);
             case "CURRENT" -> bookingRepository.findCurrentBookingsForAllUserItems(owner, Status.APPROVED);
             default -> bookingRepository.findBookingsForAllUserItems(owner);

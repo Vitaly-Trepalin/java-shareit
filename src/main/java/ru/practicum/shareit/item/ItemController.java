@@ -20,7 +20,6 @@ import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemCreateCommentDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
 import ru.practicum.shareit.item.dto.ItemResponseDto;
-import ru.practicum.shareit.item.dto.ItemResponseWithCommentsDto;
 import ru.practicum.shareit.item.dto.ItemResponseWithDatesAndCommentsDto;
 import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
@@ -35,9 +34,11 @@ public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemResponseWithCommentsDto> findByIdItem(@PathVariable @Positive long itemId) {
+    public ResponseEntity<ItemResponseWithDatesAndCommentsDto> findByIdItem(@PathVariable @Positive long itemId,
+                                                                            @RequestHeader(value = "X-Sharer-User-Id")
+                                                                            @Positive long userId) {
         log.info("Method launched (findByIdItem(long itemId = {}))", itemId);
-        return new ResponseEntity<>(itemService.findByIdItem(itemId), HttpStatus.OK);
+        return new ResponseEntity<>(itemService.findByIdItem(itemId, userId), HttpStatus.OK);
     }
 
     @GetMapping
