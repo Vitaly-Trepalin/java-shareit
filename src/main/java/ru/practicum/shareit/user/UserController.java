@@ -30,7 +30,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> findByIdUser(@PathVariable @Positive long userId) { // сделать проверку на null
+    public ResponseEntity<UserResponseDto> findByIdUser(@PathVariable @Positive long userId) {
         log.info("Method launched (findByIdUser(long userId = {}))", userId);
         return new ResponseEntity<>(userService.findByIdUser(userId), HttpStatus.OK);
     }

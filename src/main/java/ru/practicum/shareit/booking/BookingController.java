@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.booking.dto.BookingApproveDto;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/bookings")
@@ -48,5 +51,33 @@ public class BookingController {
                 owner, bookingId, approved);
         BookingApproveDto bookingApproveDto = new BookingApproveDto(bookingId, approved);
         return new ResponseEntity<>(bookingService.approveBooking(bookingApproveDto, owner), HttpStatus.OK);
+    }
+
+    @GetMapping("/{bookingId}")
+    public ResponseEntity<BookingResponseDto> getBooking(@RequestHeader(name = "X-Sharer-User-Id")
+                                                         @Positive long user,
+                                                         @PathVariable @Positive long bookingId) {
+        log.info("Method launched (getBooking(long user = {}, long bookingId = {}))", user, bookingId);
+        return new ResponseEntity<>(bookingService.getBooking(user, bookingId), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<Collection<BookingResponseDto>> getBookingsForUser(@RequestParam(defaultValue = "ALL")
+                                                                             @Pattern(regexp = "ALL|CURRENT|PAST|" +
+                                                                                     "FUTURE|WAITING|REJECTED")
+                                                                             String state,
+                                                                             @RequestHeader(name = "X-Sharer-User-Id")
+                                                                             @Positive long user) {
+        log.info("Method launched (getBookingsForUser(String state = {}, long user = {}))", state, user);
+        return new ResponseEntity<>(bookingService.getBookingsForUser(state, user), HttpStatus.OK);
+    }
+
+    @GetMapping("/owner")
+    public ResponseEntity<Collection<BookingResponseDto>> getBookingsForUserItems(
+            @RequestParam(defaultValue = "ALL") @Pattern(regexp = "ALL|CURRENT|PAST|FUTURE|WAITING|REJECTED")
+            String state,
+            @RequestHeader(name = "X-Sharer-User-Id") @Positive long owner) {
+        log.info("Method launched (getBookingsForUserItems(String state = {}, long owner = {}))", state, owner);
+        return new ResponseEntity<>(bookingService.getBookingsForUserItems(state, owner), HttpStatus.OK);
     }
 }

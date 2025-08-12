@@ -14,8 +14,8 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -29,15 +29,23 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto createBooking(BookingCreateDto bookingCreateDto) {
-        Item item = itemRepository.findById(bookingCreateDto.getItemId())
-                .orElseThrow(() -> new NotFoundException(String.format("Нет вещи с id = %d",
-                        bookingCreateDto.getItemId())));
-        if (!item.isAvailable()) {
-            throw new IllegalStateException("Вещь недоступна");
+        if (!bookingCreateDto.getEnd().isAfter(bookingCreateDto.getStart())) {
+            throw new IllegalArgumentException("Время окончания бронирования не может равняться или быть раньше " +
+                    "времени начала");
         }
+
         User user = userRepository.findById(bookingCreateDto.getBookerId())
                 .orElseThrow(() -> new NotFoundException(String.format("Нет пользователя с id = %d",
                         bookingCreateDto.getBookerId())));
+
+        Item item = itemRepository.findById(bookingCreateDto.getItemId())
+                .orElseThrow(() -> new NotFoundException(String.format("Нет вещи с id = %d",
+                        bookingCreateDto.getItemId())));
+
+        if (!item.isAvailable()) {
+            throw new IllegalStateException("Вещь недоступна для бронирования");
+        }
+
         Booking booking = bookingRepository.save(BookingMapper.mapToBooking(bookingCreateDto, item, user));
         return BookingMapper.mapToBookingResponseDto(booking);
     }
@@ -45,18 +53,16 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingResponseDto approveBooking(BookingApproveDto bookingApproveDto, long owner) {
-//        if (bookingApproveDto.getBookingId() == null) {
-//            Collection<Item> items = itemRepository.findAllByOwnerIdAndStatusTrue(owner);
-//            Collection<Booking> bookings = bookingRepository.findAllByItem(item);
-//        }
         Booking booking = bookingRepository.findById(bookingApproveDto.getBookingId())
                 .orElseThrow(() -> new NotFoundException(String.format("Нет бронирования с id = %d",
                         bookingApproveDto.getBookingId())));
+
         if (!Objects.equals(booking.getItem().getOwner().getId(), owner)) {
             throw new HttpClientErrorException(HttpStatus.FORBIDDEN, String.format("Пользователь с id = %d " +
                             "не является владельцем вещи с id = %d",
                     owner, bookingApproveDto.getBookingId()));
         }
+
         if (bookingApproveDto.getApproved()) {
             booking.setStatus(Status.APPROVED);
         } else {
@@ -65,5 +71,57 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.mapToBookingResponseDto(booking);
     }
 
+    @Override
+    public BookingResponseDto getBooking(long user, long bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException(String.format("Нет бронирования с id = %d", bookingId)));
 
+        boolean isBooker = booking.getBooker().getId() == user;
+        boolean isOwner = booking.getItem().getOwner().getId() == user;
+
+        if (!isBooker && !isOwner) {
+            throw new HttpClientErrorException(HttpStatus.FORBIDDEN,
+                    String.format("Пользователь с id = %d не может получить информацию о бронировании", user));
+        }
+        return BookingMapper.mapToBookingResponseDto(booking);
+    }
+
+    @Override
+    public Collection<BookingResponseDto> getBookingsForUser(String state, long userId) {
+        User booker = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Нет пользователя с id = %d", userId)));
+
+        LocalDateTime currentTimeAndDate = LocalDateTime.now();
+        Collection<Booking> bookings = switch (state) {
+            case "REJECTED" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.REJECTED);
+            case "WAITING" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.WAITING);
+            case "PAST" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.CANCELED);
+            case "FUTURE" -> bookingRepository.findAllByBookerAndStatusAndStartAfterOrderByStartAsc(
+                    booker, Status.APPROVED, currentTimeAndDate);
+            case "CURRENT" -> bookingRepository.findAllByBookerAndStatusAndStartBeforeOrderByStartAsc(
+                    booker, Status.APPROVED, currentTimeAndDate);
+            default -> bookingRepository.findAllByBookerOrderByStart(booker);
+        };
+        return bookings.stream()
+                .map(BookingMapper::mapToBookingResponseDto)
+                .toList();
+    }
+
+    @Override
+    public Collection<BookingResponseDto> getBookingsForUserItems(String state, long userId) {
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(String.format("Нет пользователя с id = %d", userId)));
+
+        Collection<Booking> bookings = switch (state) {
+            case "REJECTED" -> bookingRepository.findBookingsForAllUserItems(owner, Status.REJECTED);
+            case "WAITING" -> bookingRepository.findBookingsForAllUserItems(owner, Status.WAITING);
+            case "PAST" -> bookingRepository.findBookingsForAllUserItems(owner, Status.CANCELED);
+            case "FUTURE" -> bookingRepository.findFutureBookingsForAllUserItems(owner, Status.APPROVED);
+            case "CURRENT" -> bookingRepository.findCurrentBookingsForAllUserItems(owner, Status.APPROVED);
+            default -> bookingRepository.findBookingsForAllUserItems(owner);
+        };
+        return bookings.stream()
+                .map(BookingMapper::mapToBookingResponseDto)
+                .toList();
+    }
 }

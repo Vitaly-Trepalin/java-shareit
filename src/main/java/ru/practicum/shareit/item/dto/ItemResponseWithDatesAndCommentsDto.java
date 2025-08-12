@@ -4,14 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemResponseDto {
+public class ItemResponseWithDatesAndCommentsDto {
     private Long id;
     private String name;
     private String description;
     private Boolean available;
     private Long owner;
     private Long request;
+    private List<LocalDateTime> lastBooking;
+    private List<LocalDateTime> nextBooking;
+    private List<CommentResponseDto> comments;
 }

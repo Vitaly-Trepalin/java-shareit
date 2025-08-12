@@ -15,29 +15,28 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-    private final UserMapper userMapper;
     private final UserRepository userRepository;
 
     @Override
     public UserResponseDto findByIdUser(long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Нет пользователя с id = %d", userId)));
-        return userMapper.mapToUserDto(user);
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
     public Collection<UserResponseDto> findAllUsers() {
         Collection<User> users = userRepository.findAll();
         return users.stream()
-                .map(userMapper::mapToUserDto)
+                .map(UserMapper::mapToUserDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
     public UserResponseDto createUser(UserCreateDto userCreateDto) {
-        User user = userRepository.save(userMapper.mapToUser(userCreateDto));
-        return userMapper.mapToUserDto(user);
+        User user = userRepository.save(UserMapper.mapToUser(userCreateDto));
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
@@ -52,7 +51,7 @@ public class UserServiceImpl implements UserService {
         if (userUpdateDto.getEmail() != null) {
             user.setEmail(userUpdateDto.getEmail());
         }
-        return userMapper.mapToUserDto(user);
+        return UserMapper.mapToUserDto(user);
     }
 
     @Override
