@@ -5,10 +5,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    Collection<Item> findAllByOwnerId(long userId);
+    List<Item> findAllByOwnerId(long userId);
 
     @Query("""
             SELECT i FROM Item i
@@ -16,5 +16,5 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             OR LOWER(i.description) LIKE LOWER(concat('%', :text, '%')))
             AND i.available = true
             """)
-    Collection<Item> findAllItemsByText(@Param("text") String text);
+    List<Item> findAllItemsByText(@Param("text") String text);
 }

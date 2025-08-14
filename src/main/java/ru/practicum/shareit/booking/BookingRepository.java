@@ -7,17 +7,17 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    Collection<Booking> findAllByBookerOrderByStart(User booker);
+    List<Booking> findAllByBookerOrderByStart(User booker);
 
-    Collection<Booking> findAllByBookerAndStatusOrderByStartAsc(User booker, Status status);
+    List<Booking> findAllByBookerAndStatusOrderByStartAsc(User booker, Status status);
 
-    Collection<Booking> findAllByBookerAndStatusAndEndBeforeOrderByStartAsc(
+    List<Booking> findAllByBookerAndStatusAndEndBeforeOrderByStartAsc(
             User booker, Status status, LocalDateTime currentTimeAndDate);
 
-    Collection<Booking> findAllByBookerAndStatusAndStartAfterOrderByStartAsc(
+    List<Booking> findAllByBookerAndStatusAndStartAfterOrderByStartAsc(
             User booker, Status status, LocalDateTime currentTimeAndDate);
 
     @Query("""
@@ -28,7 +28,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
               AND b.end >= :currentTime
             ORDER BY b.start ASC
             """)
-    Collection<Booking> findCurrentBookings(
+    List<Booking> findCurrentBookings(
             @Param("booker") User booker,
             @Param("status") Status status,
             @Param("currentTime") LocalDateTime currentTime);
@@ -39,7 +39,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE i.owner = ?1
             ORDER BY b.start ASC
             """)
-    Collection<Booking> findBookingsForAllUserItems(User owner);
+    List<Booking> findBookingsForAllUserItems(User owner);
 
     @Query("""
             SELECT b FROM Booking b
@@ -47,7 +47,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE i.owner = ?1 AND b.status = ?2
             ORDER BY b.start ASC
             """)
-    Collection<Booking> findBookingsForAllUserItems(User owner, Status status);
+    List<Booking> findBookingsForAllUserItems(User owner, Status status);
 
     @Query("""
             SELECT b FROM Booking b
@@ -55,7 +55,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE i.owner = ?1 AND b.end < CURRENT_TIMESTAMP AND b.status = ?2
             ORDER BY b.start ASC
             """)
-    Collection<Booking> findPastBookingsForAllUserItems(User owner, Status status);
+    List<Booking> findPastBookingsForAllUserItems(User owner, Status status);
 
     @Query("""
             SELECT b FROM Booking b
@@ -63,7 +63,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE i.owner = ?1 AND b.start <= CURRENT_TIMESTAMP AND b.end >= CURRENT_TIMESTAMP AND b.status = ?2
             ORDER BY b.start ASC
             """)
-    Collection<Booking> findCurrentBookingsForAllUserItems(User owner, Status status);
+    List<Booking> findCurrentBookingsForAllUserItems(User owner, Status status);
 
     @Query("""
             SELECT b FROM Booking b
@@ -71,7 +71,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             WHERE i.owner = ?1 AND b.start > CURRENT_TIMESTAMP AND b.status = ?2
             ORDER BY b.start ASC
             """)
-    Collection<Booking> findFutureBookingsForAllUserItems(User owner, Status status);
+    List<Booking> findFutureBookingsForAllUserItems(User owner, Status status);
 
     @Query(value = """
             (SELECT * FROM bookings b
@@ -85,7 +85,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             LIMIT 1)
             ORDER BY start_date
             """, nativeQuery = true)
-    Collection<Booking> findLastAndNextBookingItem(@Param("itemId") long itemId);
+    List<Booking> findLastAndNextBookingItem(@Param("itemId") long itemId);
 
     boolean existsByBookerAndItemAndStatusAndEndBefore(User booker, Item item, Status status, LocalDateTime end);
 }

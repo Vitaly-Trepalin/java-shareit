@@ -16,6 +16,7 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -43,7 +44,7 @@ public class BookingServiceImpl implements BookingService {
                         bookingCreateDto.getItemId())));
 
         if (!item.isAvailable()) {
-            throw new IllegalStateException("Вещь недоступна для бронирования");
+            throw new IllegalStateException(String.format("Вещь c id = %d недоступна для бронирования", item.getId()));
         }
 
         Booking booking = bookingRepository.save(BookingMapper.mapToBooking(bookingCreateDto, item, user));
@@ -87,19 +88,19 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingResponseDto> getBookingsForUser(String state, long userId) {
+    public List<BookingResponseDto> getBookingsForUser(State state, long userId) {
         User booker = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Нет пользователя с id = %d", userId)));
 
         LocalDateTime currentTimeAndDate = LocalDateTime.now();
-        Collection<Booking> bookings = switch (state) {
-            case "REJECTED" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.REJECTED);
-            case "WAITING" -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.WAITING);
-            case "PAST" -> bookingRepository.findAllByBookerAndStatusAndEndBeforeOrderByStartAsc(booker,
+        List<Booking> bookings = switch (state) {
+            case State.REJECTED -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.REJECTED);
+            case State.WAITING -> bookingRepository.findAllByBookerAndStatusOrderByStartAsc(booker, Status.WAITING);
+            case State.PAST -> bookingRepository.findAllByBookerAndStatusAndEndBeforeOrderByStartAsc(booker,
                     Status.APPROVED, currentTimeAndDate);
-            case "FUTURE" -> bookingRepository.findAllByBookerAndStatusAndStartAfterOrderByStartAsc(
+            case State.FUTURE -> bookingRepository.findAllByBookerAndStatusAndStartAfterOrderByStartAsc(
                     booker, Status.APPROVED, currentTimeAndDate);
-            case "CURRENT" -> bookingRepository.findCurrentBookings(booker, Status.APPROVED, currentTimeAndDate);
+            case State.CURRENT -> bookingRepository.findCurrentBookings(booker, Status.APPROVED, currentTimeAndDate);
             default -> bookingRepository.findAllByBookerOrderByStart(booker);
         };
         return bookings.stream()
@@ -108,16 +109,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingResponseDto> getBookingsForUserItems(String state, long userId) {
+    public List<BookingResponseDto> getBookingsForUserItems(State state, long userId) {
         User owner = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(String.format("Нет пользователя с id = %d", userId)));
 
         Collection<Booking> bookings = switch (state) {
-            case "REJECTED" -> bookingRepository.findBookingsForAllUserItems(owner, Status.REJECTED);
-            case "WAITING" -> bookingRepository.findBookingsForAllUserItems(owner, Status.WAITING);
-            case "PAST" -> bookingRepository.findPastBookingsForAllUserItems(owner, Status.APPROVED);
-            case "FUTURE" -> bookingRepository.findFutureBookingsForAllUserItems(owner, Status.APPROVED);
-            case "CURRENT" -> bookingRepository.findCurrentBookingsForAllUserItems(owner, Status.APPROVED);
+            case State.REJECTED -> bookingRepository.findBookingsForAllUserItems(owner, Status.REJECTED);
+            case State.WAITING -> bookingRepository.findBookingsForAllUserItems(owner, Status.WAITING);
+            case State.PAST -> bookingRepository.findPastBookingsForAllUserItems(owner, Status.APPROVED);
+            case State.FUTURE -> bookingRepository.findFutureBookingsForAllUserItems(owner, Status.APPROVED);
+            case State.CURRENT -> bookingRepository.findCurrentBookingsForAllUserItems(owner, Status.APPROVED);
             default -> bookingRepository.findBookingsForAllUserItems(owner);
         };
         return bookings.stream()

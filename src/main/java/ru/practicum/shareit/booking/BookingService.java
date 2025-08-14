@@ -4,7 +4,7 @@ import ru.practicum.shareit.booking.dto.BookingApproveDto;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface BookingService {
     BookingResponseDto createBooking(BookingCreateDto bookingCreateDto);
@@ -13,7 +13,7 @@ public interface BookingService {
 
     BookingResponseDto getBooking(long user, long bookingId);
 
-    Collection<BookingResponseDto> getBookingsForUser(String state, long user);
+    List<BookingResponseDto> getBookingsForUser(State state, long user);
 
-    Collection<BookingResponseDto> getBookingsForUserItems(String state, long user);
+    List<BookingResponseDto> getBookingsForUserItems(State state, long user);
 }

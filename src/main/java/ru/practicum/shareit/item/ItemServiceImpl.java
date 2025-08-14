@@ -62,8 +62,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemResponseWithDatesAndCommentsDto> findAllItemsByUserId(long userId) {
-        Collection<Item> items = itemRepository.findAllByOwnerId(userId);
+    public List<ItemResponseWithDatesAndCommentsDto> findAllItemsByUserId(long userId) {
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
 
         return items.stream()
                 .map(item -> {
@@ -124,11 +124,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemResponseDto> searchItems(String text) {
+    public List<ItemResponseDto> searchItems(String text) {
         if (text.isEmpty()) {
             return Collections.emptyList();
         }
-        Collection<Item> items = itemRepository.findAllItemsByText(text);
+        List<Item> items = itemRepository.findAllItemsByText(text);
         return items.stream()
                 .map(ItemMapper::mapToItemResponseDto)
                 .collect(Collectors.toList());

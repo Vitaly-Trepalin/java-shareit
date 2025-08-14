@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.dto.UserUpdateDto;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,7 +26,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<UserResponseDto> findAllUsers() {
+    public List<UserResponseDto> findAllUsers() {
         Collection<User> users = userRepository.findAll();
         return users.stream()
                 .map(UserMapper::mapToUserDto)
