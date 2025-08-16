@@ -1,9 +1,9 @@
 package ru.practicum.shareit.user;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,43 +13,49 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.Marker;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.dto.UserCreateDto;
+import ru.practicum.shareit.user.dto.UserResponseDto;
+import ru.practicum.shareit.user.dto.UserUpdateDto;
 
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+@Validated
 @Slf4j
 public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserDto> findByIdUser(@PathVariable long userId) {
-        return new ResponseEntity<>(userService.findByIdUser(userId), HttpStatus.OK);
+    public UserResponseDto findByIdUser(@PathVariable @Positive long userId) {
+        log.info("Method launched (findByIdUser(long userId = {}))", userId);
+        return userService.findByIdUser(userId);
     }
 
     @GetMapping
-    public ResponseEntity<Collection<UserDto>> findAllUsers() {
-        return new ResponseEntity<>(userService.findAllUsers(), HttpStatus.OK);
+    public List<UserResponseDto> findAllUsers() {
+        log.info("Method launched (findAllUsers())");
+        return userService.findAllUsers();
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(@RequestBody @Validated(Marker.OnCreate.class) UserDto userDto) {
-        return new ResponseEntity<>(userService.createUser(userDto), HttpStatus.CREATED);
+    public UserResponseDto createUser(@RequestBody @Valid UserCreateDto userCreateDto) {
+        log.info("Method launched (createUser(UserDto userDto = {}))", userCreateDto);
+        return userService.createUser(userCreateDto);
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserDto> updateUser(@PathVariable long userId,
-                                              @RequestBody @Validated(Marker.OnUpdate.class) UserDto userDto) {
-        return new ResponseEntity<>(userService.updateUser(userId, userDto), HttpStatus.OK);
+    public UserResponseDto updateUser(@PathVariable @Positive long userId,
+                                      @RequestBody @Valid UserUpdateDto userUpdateDto) {
+        log.info("Method launched (updateUser(long userId = {}, User user = {}))", userId, userUpdateDto);
+        UserUpdateDto newUserUpdateDto = new UserUpdateDto(userId, userUpdateDto.getName(), userUpdateDto.getEmail());
+        return userService.updateUser(newUserUpdateDto);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable long userId) {
+    public void deleteUser(@PathVariable @Positive long userId) {
+        log.info("Method launched (deleteUser(long userId = {}))", userId);
         userService.deleteUser(userId);
-        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

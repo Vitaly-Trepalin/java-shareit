@@ -1,8 +1,9 @@
 package ru.practicum.shareit.item;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -13,44 +14,74 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.Marker;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.dto.CommentResponseDto;
+import ru.practicum.shareit.item.dto.ItemCreateCommentDto;
+import ru.practicum.shareit.item.dto.ItemCreateDto;
+import ru.practicum.shareit.item.dto.ItemResponseDto;
+import ru.practicum.shareit.item.dto.ItemResponseWithDatesAndCommentsDto;
+import ru.practicum.shareit.item.dto.ItemUpdateDto;
 
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/items")
+@Slf4j
+@Validated
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemDto> findByIdItem(@PathVariable long itemId) {
-        return new ResponseEntity<>(itemService.findByIdItem(itemId), HttpStatus.OK);
+    public ItemResponseWithDatesAndCommentsDto findByIdItem(@PathVariable @Positive long itemId,
+                                                            @RequestHeader(value = "X-Sharer-User-Id")
+                                                            @Positive long userId) {
+        log.info("Method launched (findByIdItem(long itemId = {}))", itemId);
+        return itemService.findByIdItem(itemId, userId);
     }
 
     @GetMapping
-    public ResponseEntity<Collection<ItemDto>> findAllItemsByUserId(@RequestHeader(value = "X-Sharer-User-Id")
-                                                                    long userId) {
-        return new ResponseEntity<>(itemService.findAllItemsByUserId(userId), HttpStatus.OK);
+    public List<ItemResponseWithDatesAndCommentsDto> findAllItemsByUserId(@RequestHeader(value = "X-Sharer-User-Id")
+                                                                          @Positive long userId) {
+        log.info("Method launched (findAllItemsByUserId(long userId = {}))", userId);
+        return itemService.findAllItemsByUserId(userId);
     }
 
     @PostMapping
-    public ResponseEntity<ItemDto> createItem(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                              @RequestBody @Validated(Marker.OnCreate.class) ItemDto itemDto) {
-        return new ResponseEntity<>(itemService.createItem(userId, itemDto), HttpStatus.CREATED);
+    public ItemResponseDto createItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
+                                      @RequestBody @Valid ItemCreateDto itemCreateDto) {
+        log.info("Method launched (createItem(long userId = {}, ItemCreateDto itemCreateDto = {}))",
+                userId, itemCreateDto);
+        ItemCreateDto newItemCreateDto = new ItemCreateDto(itemCreateDto.getName(), itemCreateDto.getDescription(),
+                itemCreateDto.getAvailable(), userId, itemCreateDto.getRequest());
+        return itemService.createItem(newItemCreateDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemDto> updateItem(@RequestHeader(value = "X-Sharer-User-Id") long userId,
-                                              @PathVariable long itemId,
-                                              @RequestBody ItemDto itemDto) {
-        return new ResponseEntity<>(itemService.updateItem(userId, itemId, itemDto), HttpStatus.OK);
+    public ItemResponseDto updateItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
+                                      @PathVariable @Positive long itemId,
+                                      @RequestBody @Valid ItemUpdateDto itemUpdateDto) {
+        log.info("Method launched (updateItem(long userId = {}, long itemId = {}, ItemDto itemDto = {}))", userId,
+                itemId, itemUpdateDto);
+        ItemUpdateDto newItemUpdateDto = new ItemUpdateDto(itemId, itemUpdateDto.getName(),
+                itemUpdateDto.getDescription(), itemUpdateDto.getAvailable(), userId,
+                itemUpdateDto.getRequest());
+        return itemService.updateItem(newItemUpdateDto);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<Collection<ItemDto>> searchItems(@RequestParam() String text) {
-        return new ResponseEntity<>(itemService.searchItems(text), HttpStatus.OK);
+    public List<ItemResponseDto> searchItems(@RequestParam() String text) {
+        log.info("Method launched (searchItems(String text = {}))", text);
+        return itemService.searchItems(text);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentResponseDto createComment(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
+                                            @PathVariable @Positive long itemId,
+                                            @RequestBody ItemCreateCommentDto itemCreateCommentDto) {
+        log.info("Method launched (createComment(long userId = {}, long itemId = {}, " +
+                "ItemCreateCommentDto itemCreateCommentDto{}))", userId, itemId, itemCreateCommentDto);
+        ItemCreateCommentDto newItemCreateCommentDto = new ItemCreateCommentDto(itemId, userId,
+                itemCreateCommentDto.getText());
+        return itemService.createComment(newItemCreateCommentDto);
     }
 }

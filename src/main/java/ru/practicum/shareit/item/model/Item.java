@@ -1,22 +1,43 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.Data;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import ru.practicum.shareit.user.User;
 
-@Data
+@Entity
+@Table(name = "items")
+@Getter
+@Setter
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "item_id")
     private Long id;
     private String name;
     private String description;
     private boolean available;
-    private Long owner;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User owner;
     private Long request;
 
-    public Item(Long id, String name, String description, boolean available, Long owner, Long request) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.owner = owner;
-        this.request = request;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Item)) return false;
+        return id != null && id.equals(((Item) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }
