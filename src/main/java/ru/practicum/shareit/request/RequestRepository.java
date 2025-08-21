@@ -1,4 +1,6 @@
 package ru.practicum.shareit.request;
 
-public interface RequestRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface RequestRepository extends JpaRepository<ItemRequest, Long> {
 }

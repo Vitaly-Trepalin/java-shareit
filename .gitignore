@@ -1,6 +1,6 @@
 HELP.md
 *.DS_Store
-volumes/postgres/*
+volumes/postgres/
 
 target/
 !.mvn/wrapper/maven-wrapper.jar
