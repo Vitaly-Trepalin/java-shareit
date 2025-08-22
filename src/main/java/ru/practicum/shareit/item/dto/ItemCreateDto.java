@@ -20,5 +20,5 @@ public class ItemCreateDto {
     @NotNull(message = "Статус не может быть пустым")
     private Boolean available;
     private Long owner;
-    private Long request;
+    private Long requestId;
 }

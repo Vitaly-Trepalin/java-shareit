@@ -52,7 +52,7 @@ public class ItemController {
         log.info("Method launched (createItem(long userId = {}, ItemCreateDto itemCreateDto = {}))",
                 userId, itemCreateDto);
         ItemCreateDto newItemCreateDto = new ItemCreateDto(itemCreateDto.getName(), itemCreateDto.getDescription(),
-                itemCreateDto.getAvailable(), userId, itemCreateDto.getRequest());
+                itemCreateDto.getAvailable(), userId, itemCreateDto.getRequestId());
         return itemService.createItem(newItemCreateDto);
     }
 
@@ -64,7 +64,7 @@ public class ItemController {
                 itemId, itemUpdateDto);
         ItemUpdateDto newItemUpdateDto = new ItemUpdateDto(itemId, itemUpdateDto.getName(),
                 itemUpdateDto.getDescription(), itemUpdateDto.getAvailable(), userId,
-                itemUpdateDto.getRequest());
+                itemUpdateDto.getRequestId());
         return itemService.updateItem(newItemUpdateDto);
     }
 

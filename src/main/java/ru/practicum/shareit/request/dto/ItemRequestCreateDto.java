@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Data
 public class ItemRequestCreateDto {
-    private Long requestorId;
+    private Long requestor;
     @Size(max = 320, message = "Описание вещи не может быть больше 320 символов")
     @NotBlank(message = "Описание вещи не может быть пустым")
     private String description;

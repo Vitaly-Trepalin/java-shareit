@@ -27,7 +27,8 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User owner;
-    private Long request;
+    @Column(name = "request_id")
+    private Long requestId;
 
     @Override
     public boolean equals(Object o) {

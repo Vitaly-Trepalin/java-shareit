@@ -16,7 +16,7 @@ public class ItemResponseWithDatesAndCommentsDto {
     private String description;
     private Boolean available;
     private Long owner;
-    private Long request;
+    private Long requestId;
     private List<LocalDateTime> lastBooking;
     private List<LocalDateTime> nextBooking;
     private List<CommentResponseDto> comments;

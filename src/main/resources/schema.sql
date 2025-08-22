@@ -10,7 +10,7 @@ name VARCHAR(100) NOT NULL,
 description VARCHAR(320) NOT NULL,
 available BOOLEAN NOT NULL,
 user_id BIGINT  NOT NULL REFERENCES users(user_id) ON DELETE CASCADE,
-request BIGINT
+request_id BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
