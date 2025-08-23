@@ -1,10 +1,7 @@
 package ru.practicum.shareit.item;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,29 +23,27 @@ import java.util.List;
 @RestController
 @RequestMapping("/items")
 @Slf4j
-@Validated
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
 
     @GetMapping("/{itemId}")
-    public ItemResponseWithDatesAndCommentsDto findByIdItem(@PathVariable @Positive long itemId,
-                                                            @RequestHeader(value = "X-Sharer-User-Id")
-                                                            @Positive long userId) {
+    public ItemResponseWithDatesAndCommentsDto findByIdItem(@PathVariable long itemId,
+                                                            @RequestHeader(value = "X-Sharer-User-Id") long userId) {
         log.info("Method launched (findByIdItem(long itemId = {}))", itemId);
         return itemService.findByIdItem(itemId, userId);
     }
 
     @GetMapping
     public List<ItemResponseWithDatesAndCommentsDto> findAllItemsByUserId(@RequestHeader(value = "X-Sharer-User-Id")
-                                                                          @Positive long userId) {
+                                                                          long userId) {
         log.info("Method launched (findAllItemsByUserId(long userId = {}))", userId);
         return itemService.findAllItemsByUserId(userId);
     }
 
     @PostMapping
-    public ItemResponseDto createItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
-                                      @RequestBody @Valid ItemCreateDto itemCreateDto) {
+    public ItemResponseDto createItem(@RequestHeader(value = "X-Sharer-User-Id") long userId,
+                                      @RequestBody ItemCreateDto itemCreateDto) {
         log.info("Method launched (createItem(long userId = {}, ItemCreateDto itemCreateDto = {}))",
                 userId, itemCreateDto);
         ItemCreateDto newItemCreateDto = new ItemCreateDto(itemCreateDto.getName(), itemCreateDto.getDescription(),
@@ -57,9 +52,8 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemResponseDto updateItem(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
-                                      @PathVariable @Positive long itemId,
-                                      @RequestBody @Valid ItemUpdateDto itemUpdateDto) {
+    public ItemResponseDto updateItem(@RequestHeader(value = "X-Sharer-User-Id") long userId, @PathVariable long itemId,
+                                      @RequestBody ItemUpdateDto itemUpdateDto) {
         log.info("Method launched (updateItem(long userId = {}, long itemId = {}, ItemDto itemDto = {}))", userId,
                 itemId, itemUpdateDto);
         ItemUpdateDto newItemUpdateDto = new ItemUpdateDto(itemId, itemUpdateDto.getName(),
@@ -75,8 +69,8 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentResponseDto createComment(@RequestHeader(value = "X-Sharer-User-Id") @Positive long userId,
-                                            @PathVariable @Positive long itemId,
+    public CommentResponseDto createComment(@RequestHeader(value = "X-Sharer-User-Id") long userId,
+                                            @PathVariable long itemId,
                                             @RequestBody ItemCreateCommentDto itemCreateCommentDto) {
         log.info("Method launched (createComment(long userId = {}, long itemId = {}, " +
                 "ItemCreateCommentDto itemCreateCommentDto{}))", userId, itemId, itemCreateCommentDto);

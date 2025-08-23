@@ -1,9 +1,7 @@
 package ru.practicum.shareit.request;
 
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,14 +18,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/requests")
 @Slf4j
-@Validated
 @RequiredArgsConstructor
 public class ItemRequestController {
     private final RequestService requestService;
 
     @PostMapping
-    public ItemRequestResponseDto createItemRequest(@RequestHeader(value = "X-Sharer-User-Id") @Positive
-                                                    long requestor,
+    public ItemRequestResponseDto createItemRequest(@RequestHeader(value = "X-Sharer-User-Id") long requestor,
                                                     @RequestBody ItemRequestCreateDto request) {
         log.info("Method launched (createItemRequest(long userId = {}, " +
                         "ItemRequestCreateDto itemRequestCreateDto = {}))",
@@ -38,13 +34,13 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestResponseWithItemDto> findListOfYourRequests(@RequestHeader(value = "X-Sharer-User-Id")
-                                                                       @Positive long requestor) {
+                                                                       long requestor) {
         log.info("Method launched (findListOfYourRequests(long requestorId = {}))", requestor);
         return requestService.findListOfYourRequests(requestor);
     }
 
     @GetMapping("/all")
-    public List<ItemRequestResponseDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") @Positive long requestor) {
+    public List<ItemRequestResponseDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long requestor) {
         log.info("Method launched (findAll(long userId = {}))", requestor);
         return requestService.findAll(requestor);
     }
