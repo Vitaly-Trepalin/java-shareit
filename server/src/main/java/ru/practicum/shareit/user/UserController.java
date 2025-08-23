@@ -1,10 +1,7 @@
 package ru.practicum.shareit.user;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,13 +19,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-@Validated
 @Slf4j
 public class UserController {
     private final UserService userService;
 
     @GetMapping("/{userId}")
-    public UserResponseDto findByIdUser(@PathVariable @Positive long userId) {
+    public UserResponseDto findByIdUser(@PathVariable long userId) {
         log.info("Method launched (findByIdUser(long userId = {}))", userId);
         return userService.findByIdUser(userId);
     }
@@ -40,21 +36,21 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDto createUser(@RequestBody @Valid UserCreateDto userCreateDto) {
+    public UserResponseDto createUser(@RequestBody UserCreateDto userCreateDto) {
         log.info("Method launched (createUser(UserDto userDto = {}))", userCreateDto);
         return userService.createUser(userCreateDto);
     }
 
     @PatchMapping("/{userId}")
-    public UserResponseDto updateUser(@PathVariable @Positive long userId,
-                                      @RequestBody @Valid UserUpdateDto userUpdateDto) {
+    public UserResponseDto updateUser(@PathVariable long userId,
+                                      @RequestBody UserUpdateDto userUpdateDto) {
         log.info("Method launched (updateUser(long userId = {}, User user = {}))", userId, userUpdateDto);
         UserUpdateDto newUserUpdateDto = new UserUpdateDto(userId, userUpdateDto.getName(), userUpdateDto.getEmail());
         return userService.updateUser(newUserUpdateDto);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable @Positive long userId) {
+    public void deleteUser(@PathVariable long userId) {
         log.info("Method launched (deleteUser(long userId = {}))", userId);
         userService.deleteUser(userId);
     }
