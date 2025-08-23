@@ -14,12 +14,12 @@ import ru.practicum.shareit.booking1.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking1.dto.BookingState;
 import ru.practicum.shareit.client.BaseClient;
 
-@Service
-public class BookingClient extends BaseClient {
+//@Service
+public class BookingClient1 extends BaseClient {
     private static final String API_PREFIX = "/bookings";
 
     @Autowired
-    public BookingClient(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public BookingClient1(@Value("${shareit-server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.booking1.dto;
 
 import java.time.LocalDateTime;
 

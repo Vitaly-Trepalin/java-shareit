@@ -20,13 +20,13 @@ import ru.practicum.shareit.booking1.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking1.dto.BookingState;
 
 
-@Controller
+//@Controller
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-public class BookingController {
-	private final BookingClient bookingClient;
+public class BookingController1 {
+	private final BookingClient1 bookingClient;
 
 	@GetMapping
 	public ResponseEntity<Object> getBookings(@RequestHeader("X-Sharer-User-Id") long userId,
