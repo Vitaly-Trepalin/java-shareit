@@ -29,7 +29,8 @@ public class ItemRequestController {
     public ItemRequestResponseDto createItemRequest(@RequestHeader(value = "X-Sharer-User-Id") @Positive
                                                     long requestor,
                                                     @RequestBody ItemRequestCreateDto request) {
-        log.info("Method launched (createItemRequest(long userId = {}, ItemRequestCreateDto itemRequestCreateDto = {}))",
+        log.info("Method launched (createItemRequest(long userId = {}, " +
+                        "ItemRequestCreateDto itemRequestCreateDto = {}))",
                 requestor, request);
         ItemRequestCreateDto newRequest = new ItemRequestCreateDto(requestor, request.getDescription());
         return requestService.createItemRequest(newRequest);
