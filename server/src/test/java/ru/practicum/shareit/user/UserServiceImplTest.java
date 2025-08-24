@@ -1,5 +1,6 @@
 package ru.practicum.shareit.user;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +20,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserServiceImplTest {
-    @Autowired
-    private UserServiceImpl userService;
-    @Autowired
-    private UserRepository userRepository;
+    private final UserServiceImpl userService;
+    private final UserRepository userRepository;
 
     private UserCreateDto userCreateDto;
     private User user;

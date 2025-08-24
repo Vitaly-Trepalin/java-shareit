@@ -1,5 +1,7 @@
 package ru.practicum.shareit.item;
 
+import jakarta.validation.ValidationException;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentResponseDto;
 import ru.practicum.shareit.item.dto.ItemCreateCommentDto;
 import ru.practicum.shareit.item.dto.ItemCreateDto;
@@ -31,17 +34,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemServiceImplTest {
-    @Autowired
-    private ItemServiceImpl itemService;
-    @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private CommentRepository commentRepository;
+    private final ItemServiceImpl itemService;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     private User owner;
     private User booker;
@@ -91,6 +90,13 @@ public class ItemServiceImplTest {
     }
 
     @Test
+    void testCreateItemWithNonExistentOwner() {
+        ItemCreateDto invalidDto = new ItemCreateDto("Item", "Desc", true, 50L, null);
+
+        assertThrows(NotFoundException.class, () -> itemService.createItem(invalidDto));
+    }
+
+    @Test
     void testFindByIdItem() {
         ItemResponseWithDatesAndCommentsDto result = itemService.findByIdItem(item.getId(), owner.getId());
 
@@ -99,6 +105,11 @@ public class ItemServiceImplTest {
         assertEquals(item.getName(), result.getName());
         assertEquals(item.getDescription(), result.getDescription());
         assertNotNull(result.getComments());
+    }
+
+    @Test
+    void testFindByIdItemWithNonExistentItem() {
+        assertThrows(NotFoundException.class, () -> itemService.findByIdItem(50L, owner.getId()));
     }
 
     @Test
@@ -133,6 +144,22 @@ public class ItemServiceImplTest {
         assertEquals("updateItem", updatedItem.get().getName());
         assertEquals("updateDescription", updatedItem.get().getDescription());
         assertFalse(updatedItem.get().isAvailable());
+    }
+
+    @Test
+    void testUpdateItemWithNonExistentItem() {
+        ItemUpdateDto invalidDto = new ItemUpdateDto(999L, "Name", "Desc", true,
+                owner.getId(), null);
+
+        assertThrows(NotFoundException.class, () -> itemService.updateItem(invalidDto));
+    }
+
+    @Test
+    void testUpdateItemByNonOwner() {
+        ItemUpdateDto invalidDto = new ItemUpdateDto(item.getId(), "Name", "Desc", true,
+                booker.getId(), null);
+
+        assertThrows(NotFoundException.class, () -> itemService.updateItem(invalidDto));
     }
 
     @Test
@@ -188,5 +215,26 @@ public class ItemServiceImplTest {
         List<Comment> comments = commentRepository.findAll();
         assertEquals(1, comments.size());
         assertEquals("Normik", comments.get(0).getText());
+    }
+
+    @Test
+    void testCreateCommentWithoutBooking() {
+        ItemCreateCommentDto commentDto = new ItemCreateCommentDto(item.getId(), booker.getId(), "Comment");
+
+        assertThrows(ValidationException.class, () -> itemService.createComment(commentDto));
+    }
+
+    @Test
+    void testCreateCommentForNonExistentItem() {
+        ItemCreateCommentDto commentDto = new ItemCreateCommentDto(50L, booker.getId(), "Comment");
+
+        assertThrows(NotFoundException.class, () -> itemService.createComment(commentDto));
+    }
+
+    @Test
+    void testCreateCommentByNonExistentUser() {
+        ItemCreateCommentDto commentDto = new ItemCreateCommentDto(item.getId(), 50L, "Comment");
+
+        assertThrows(NotFoundException.class, () -> itemService.createComment(commentDto));
     }
 }

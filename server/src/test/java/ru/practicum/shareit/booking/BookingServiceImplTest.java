@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingApproveDto;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
 import ru.practicum.shareit.booking.dto.BookingResponseDto;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -23,15 +25,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingServiceImplTest {
-    @Autowired
-    private BookingServiceImpl bookingService;
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ItemRepository itemRepository;
+    private final BookingServiceImpl bookingService;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final ItemRepository itemRepository;
 
     private User owner;
     private User booker;
@@ -93,6 +92,20 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void testCreateBookingWithNonExistentUser() {
+        BookingCreateDto invalidDto = new BookingCreateDto(
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2),
+                item.getId(),
+                50L,
+                Status.WAITING
+        );
+
+        assertThrows(NotFoundException.class, () -> bookingService.createBooking(invalidDto));
+    }
+
+
+    @Test
     void testApproveBooking() {
         BookingApproveDto approveDto = new BookingApproveDto(booking.getId(), true);
 
@@ -104,6 +117,56 @@ public class BookingServiceImplTest {
         Optional<Booking> updatedBooking = bookingRepository.findById(booking.getId());
         assertTrue(updatedBooking.isPresent());
         assertEquals(Status.APPROVED, updatedBooking.get().getStatus());
+    }
+
+    @Test
+    void testCreateBookingWithNonExistentItem() {
+        BookingCreateDto invalidDto = new BookingCreateDto(
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(2),
+                50L,
+                booker.getId(),
+                Status.WAITING
+        );
+
+        assertThrows(NotFoundException.class, () -> bookingService.createBooking(invalidDto));
+    }
+
+    @Test
+    void testCreateBookingWithUnavailableItem() {
+        item.setAvailable(false);
+        itemRepository.save(item);
+
+        assertThrows(IllegalStateException.class, () -> bookingService.createBooking(bookingCreateDto));
+    }
+
+    @Test
+    void testApproveBookingWithRejected() {
+        BookingApproveDto approveDto = new BookingApproveDto(booking.getId(), false);
+
+        BookingResponseDto result = bookingService.approveBooking(approveDto, owner.getId());
+
+        assertNotNull(result);
+        assertEquals(Status.REJECTED, result.getStatus());
+
+        Optional<Booking> updatedBooking = bookingRepository.findById(booking.getId());
+        assertTrue(updatedBooking.isPresent());
+        assertEquals(Status.REJECTED, updatedBooking.get().getStatus());
+    }
+
+    @Test
+    void testApproveBookingWithNonExistentBooking() {
+        BookingApproveDto approveDto = new BookingApproveDto(50L, true);
+
+        assertThrows(NotFoundException.class, () -> bookingService.approveBooking(approveDto, owner.getId()));
+    }
+
+    @Test
+    void testApproveBookingByNonOwner() {
+        BookingApproveDto approveDto = new BookingApproveDto(booking.getId(), true);
+
+        assertThrows(org.springframework.web.client.HttpClientErrorException.class,
+                () -> bookingService.approveBooking(approveDto, booker.getId())); // booker не владелец
     }
 
     @Test
@@ -133,11 +196,69 @@ public class BookingServiceImplTest {
     }
 
     @Test
+    void testGetBookingWithNonExistentBooking() {
+        assertThrows(NotFoundException.class, () -> bookingService.getBooking(booker.getId(), 50L));
+    }
+
+    @Test
     void testGetBookingsForUserItems() {
         List<BookingResponseDto> result = bookingService.getBookingsForUserItems(State.ALL, owner.getId());
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(booking.getId(), result.get(0).getId());
+    }
+
+    @Test
+    void testGetBookingsForUserWithStateWaiting() {
+        List<BookingResponseDto> result = bookingService.getBookingsForUser(State.WAITING, booker.getId());
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(Status.WAITING, result.get(0).getStatus());
+    }
+
+    @Test
+    void testGetBookingsForUserWithStateRejected() {
+        Booking rejectedBooking = new Booking();
+        rejectedBooking.setStart(LocalDateTime.now().plusDays(5));
+        rejectedBooking.setEnd(LocalDateTime.now().plusDays(6));
+        rejectedBooking.setItem(item);
+        rejectedBooking.setBooker(booker);
+        rejectedBooking.setStatus(Status.REJECTED);
+        bookingRepository.save(rejectedBooking);
+
+        List<BookingResponseDto> result = bookingService.getBookingsForUser(State.REJECTED, booker.getId());
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(Status.REJECTED, result.get(0).getStatus());
+    }
+
+    @Test
+    void testGetBookingsForUserWithStatePast() {
+        Booking pastBooking = new Booking();
+        pastBooking.setStart(LocalDateTime.now().minusDays(2));
+        pastBooking.setEnd(LocalDateTime.now().minusDays(1));
+        pastBooking.setItem(item);
+        pastBooking.setBooker(booker);
+        pastBooking.setStatus(Status.APPROVED);
+        bookingRepository.save(pastBooking);
+
+        List<BookingResponseDto> result = bookingService.getBookingsForUser(State.PAST, booker.getId());
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertTrue(result.get(0).getEnd().isBefore(LocalDateTime.now()));
+    }
+
+    @Test
+    void testGetBookingsForUserWithNonExistentUser() {
+        assertThrows(NotFoundException.class, () -> bookingService.getBookingsForUser(State.ALL, 50L));
+    }
+
+    @Test
+    void testGetBookingsForUserItemsWithNonExistentUser() {
+        assertThrows(NotFoundException.class, () -> bookingService.getBookingsForUserItems(State.ALL, 999L));
     }
 }

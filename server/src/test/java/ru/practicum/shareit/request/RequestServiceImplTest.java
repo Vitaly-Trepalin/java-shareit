@@ -1,10 +1,12 @@
 package ru.practicum.shareit.request;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestCreateDto;
@@ -22,15 +24,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(
         webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RequestServiceImplTest {
-    @Autowired
-    private RequestServiceImpl requestService;
-    @Autowired
-    private RequestRepository requestRepository;
-    @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final RequestServiceImpl requestService;
+    private final RequestRepository requestRepository;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     private User requestor;
     private User user;
@@ -73,6 +72,13 @@ public class RequestServiceImplTest {
     }
 
     @Test
+    void testCreateItemRequestWithNonExistentUser() {
+        ItemRequestCreateDto invalidDto = new ItemRequestCreateDto(50L, "Description");
+
+        assertThrows(NotFoundException.class, () -> requestService.createItemRequest(invalidDto));
+    }
+
+    @Test
     void testFindListOfYourRequests() {
         Item item = new Item();
         item.setName("Monitor");
@@ -93,6 +99,7 @@ public class RequestServiceImplTest {
         assertEquals("Monitor", result.get(0).getItems().get(0).getName());
     }
 
+
     @Test
     void testFindAll() {
         ItemRequest anotherRequest = new ItemRequest();
@@ -106,6 +113,11 @@ public class RequestServiceImplTest {
         assertEquals(1, result.size());
         assertEquals("Description", result.get(0).getDescription());
         assertEquals(user.getId(), result.get(0).getRequestor());
+    }
+
+    @Test
+    void testFindByIdWithNonExistentRequest() {
+        assertThrows(NotFoundException.class, () -> requestService.findById(50L));
     }
 
     @Test
