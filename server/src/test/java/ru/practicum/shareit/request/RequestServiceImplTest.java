@@ -20,11 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @SpringBootTest(
-        webEnvironment = SpringBootTest.WebEnvironment.NONE,
-        properties = {"spring.datasource.driverClassName=org.postgresql.Driver",
-                "spring.datasource.url=jdbc:postgresql://localhost:5433/test",
-                "spring.datasource.username=postgres",
-                "spring.datasource.password=12345"}
+        webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
 public class RequestServiceImplTest {
     @Autowired
