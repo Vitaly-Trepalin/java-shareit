@@ -60,8 +60,7 @@ public class BookingServiceImpl implements BookingService {
 
         if (!Objects.equals(booking.getItem().getOwner().getId(), owner)) {
             throw new HttpClientErrorException(HttpStatus.FORBIDDEN, String.format("Пользователь с id = %d " +
-                            "не является владельцем вещи с id = %d",
-                    owner, bookingApproveDto.getBookingId()));
+                    "не является владельцем вещи с id = %d", owner, bookingApproveDto.getBookingId()));
         }
 
         if (bookingApproveDto.getApproved()) {
