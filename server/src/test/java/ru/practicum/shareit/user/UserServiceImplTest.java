@@ -1,6 +1,5 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +23,11 @@ import static org.junit.jupiter.api.Assertions.*;
                 "spring.datasource.username=postgres",
                 "spring.datasource.password=12345"}
 )
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserServiceImplTest {
-    private final UserServiceImpl userService;
-    private final UserRepository userRepository;
+    @Autowired
+    private UserServiceImpl userService;
+    @Autowired
+    private UserRepository userRepository;
 
     private UserCreateDto userCreateDto;
     private User user;

@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
@@ -16,10 +15,11 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @JsonTest
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemRequestDtoJsonTest {
-    private final JacksonTester<ItemRequestResponseDto> jsonResponse;
-    private final JacksonTester<ItemRequestResponseWithItemDto> jsonResponseWithItem;
+    @Autowired
+    private JacksonTester<ItemRequestResponseDto> jsonResponse;
+    @Autowired
+    private JacksonTester<ItemRequestResponseWithItemDto> jsonResponseWithItem;
 
     @Test
     void testItemRequestResponseDto() throws Exception {

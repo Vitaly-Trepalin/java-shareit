@@ -1,6 +1,5 @@
 package ru.practicum.shareit.request;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +26,15 @@ import static org.junit.jupiter.api.Assertions.*;
                 "spring.datasource.username=postgres",
                 "spring.datasource.password=12345"}
 )
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class RequestServiceImplTest {
-    private final RequestServiceImpl requestService;
-    private final RequestRepository requestRepository;
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
+    @Autowired
+    private RequestServiceImpl requestService;
+    @Autowired
+    private RequestRepository requestRepository;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private User requestor;
     private User user;

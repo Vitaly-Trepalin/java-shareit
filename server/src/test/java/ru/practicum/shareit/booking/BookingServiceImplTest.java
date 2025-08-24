@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,12 +27,15 @@ import static org.junit.jupiter.api.Assertions.*;
                 "spring.datasource.username=postgres",
                 "spring.datasource.password=12345"}
 )
-@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingServiceImplTest {
-    private final BookingServiceImpl bookingService;
-    private final BookingRepository bookingRepository;
-    private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
+    @Autowired
+    private BookingServiceImpl bookingService;
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ItemRepository itemRepository;
 
     private User owner;
     private User booker;
